@@ -8,12 +8,13 @@ import StatementPanel from './StatementPanel'
 import DateNavBar from './DateNavBar'
 
 function latestTradingDay() {
-  const d = new Date()
-  // If Saturday(6) go back 1, if Sunday(0) go back 2
-  const dow = d.getDay()
-  if (dow === 6) d.setDate(d.getDate() - 1)
-  else if (dow === 0) d.setDate(d.getDate() - 2)
-  return d.toISOString().slice(0, 10)
+  const now = new Date()
+  let y = now.getFullYear(), mo = now.getMonth(), d = now.getDate()
+  const dow = now.getDay()
+  if (dow === 6) d -= 1
+  else if (dow === 0) d -= 2
+  const dt = new Date(Date.UTC(y, mo, d))
+  return dt.toISOString().slice(0, 10)
 }
 
 export default function RiskReportPage() {
