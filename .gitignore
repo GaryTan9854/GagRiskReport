@@ -1,0 +1,21 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/*.db
+backend/*.db.bak*
+backend/static/
+backend/.env
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Data files (keep in repo dir but not committed)
+*.pdf
+*.xls
+*.xlsx
+
+# OS
+.DS_Store
