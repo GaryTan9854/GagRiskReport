@@ -141,19 +141,23 @@ def roll_trades(
         open_month = opens[0].contract_month
         mult = closes[0].multiplier or 1
         close_fx = closes[0].fx_rate_to_aud or 1
-        # Gross PL from roll (for short position: close is buy, open is sell)
-        direction_sign = 1 if closes[0].position > 0 else -1
-        gross_pl_orig = (avg_close_price - avg_open_price) * direction_sign * total_close_qty * mult
+        # For short roll: close=buy (position>0), open=sell → P&L = (open-close)×qty×mult
+        # For long  roll: close=sell(position<0), open=buy  → P&L = (close-open)×qty×mult
+        is_short_roll = closes[0].position is not None and closes[0].position > 0
+        gross_pl_orig = (avg_open_price - avg_close_price) * total_close_qty * mult \
+            if is_short_roll else \
+            (avg_close_price - avg_open_price) * total_close_qty * mult
         gross_pl_aud = gross_pl_orig / close_fx if close_fx else 0
         total_commission = sum(t.total_commission or 0 for t in txns)
         net_pl_aud = gross_pl_aud - total_commission
+        lots_signed = -total_close_qty if is_short_roll else total_close_qty
 
         rolls.append({
             "date": day,
             "product": prod,
             "close_month": close_month,
             "open_month": open_month,
-            "lots": total_close_qty,
+            "lots": lots_signed,
             "avg_close_price": round(avg_close_price, 4),
             "avg_open_price": round(avg_open_price, 4),
             "gross_pl_aud": round(gross_pl_aud),
