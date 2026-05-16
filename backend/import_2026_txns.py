@@ -52,7 +52,7 @@ def _excel_date(val):
         return str(val)
 
 
-def _contract_month(val) -> str | None:
+def _contract_month(val):
     """Convert contract code like 2603 or 202603 to '2603'."""
     if val is None:
         return None
