@@ -1,6 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '../../api'
-import { useState } from 'react'
 
 function isoToday() {
   const now = new Date()
@@ -38,6 +37,13 @@ export default function DateNavBar({ selected, onChange }: Props) {
   const [snapshots, setSnapshots] = useState<Set<string>>(new Set())
   const scrollRef = useRef<HTMLDivElement>(null)
   const activeRef = useRef<HTMLButtonElement>(null)
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleHover = (d: string) => {
+    if (d === selected) return
+    if (hoverTimer.current) clearTimeout(hoverTimer.current)
+    hoverTimer.current = setTimeout(() => onChange(d), 150)
+  }
 
   const days = tradingDays()
 
@@ -96,6 +102,7 @@ export default function DateNavBar({ selected, onChange }: Props) {
       <button
         key={d}
         ref={isActive ? activeRef : undefined}
+        onMouseEnter={() => handleHover(d)}
         onClick={() => onChange(d)}
         title={d}
         className={`flex-shrink-0 w-8 h-8 rounded text-xs font-semibold transition-colors
