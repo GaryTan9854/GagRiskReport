@@ -52,10 +52,11 @@ export const api = {
     request<{ report_date: string; nlv_aud: number }[]>(`/report/?limit=${limit}`),
 
   // Transactions
-  getTransactions: (params: { account?: string; year?: number; transaction_type?: string; limit?: number; offset?: number } = {}) => {
+  getTransactions: (params: { account?: string; year?: number; entry_date?: string; transaction_type?: string; limit?: number; offset?: number } = {}) => {
     const qs = new URLSearchParams()
     if (params.account) qs.set('account', params.account)
     if (params.year) qs.set('year', String(params.year))
+    if (params.entry_date) qs.set('entry_date', params.entry_date)
     if (params.transaction_type) qs.set('transaction_type', params.transaction_type)
     if (params.limit) qs.set('limit', String(params.limit))
     if (params.offset) qs.set('offset', String(params.offset))

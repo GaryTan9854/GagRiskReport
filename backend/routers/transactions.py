@@ -36,6 +36,7 @@ class TransactionIn(BaseModel):
 def list_transactions(
     account: Optional[str] = Query(None),
     year: Optional[int] = Query(None),
+    entry_date: Optional[str] = Query(None),
     transaction_type: Optional[str] = Query(None),
     limit: int = Query(200),
     offset: int = Query(0),
@@ -47,6 +48,8 @@ def list_transactions(
         q = q.filter(Transaction.account == account)
     if year:
         q = q.filter(Transaction.entry_date.startswith(str(year)))
+    if entry_date:
+        q = q.filter(Transaction.entry_date == entry_date)
     if transaction_type:
         q = q.filter(Transaction.transaction_type == transaction_type)
     q = q.order_by(Transaction.entry_date.desc(), Transaction.id.desc())

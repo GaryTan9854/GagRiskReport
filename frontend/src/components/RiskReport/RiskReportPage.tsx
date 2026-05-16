@@ -6,6 +6,7 @@ import FuturesPositions from './FuturesPositions'
 import FXPositions from './FXPositions'
 import StatementPanel from './StatementPanel'
 import DateNavBar from './DateNavBar'
+import DayActivities from './DayActivities'
 
 function latestTradingDay() {
   const now = new Date()
@@ -141,6 +142,9 @@ export default function RiskReportPage() {
           {report.positions.fx1.length > 0 && (
             <FXPositions title="FX1 Positions" rows={report.positions.fx1} onPriceEdit={handlePriceEdit} />
           )}
+
+          {/* Day activities */}
+          <DayActivities date={date} />
         </div>
       )}
     </div>
