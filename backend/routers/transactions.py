@@ -144,10 +144,12 @@ def roll_trades(
         # For short roll: close=buy (position>0), open=sell → P&L = (open-close)×qty×mult
         # For long  roll: close=sell(position<0), open=buy  → P&L = (close-open)×qty×mult
         is_short_roll = closes[0].position is not None and closes[0].position > 0
-        gross_pl_orig = (avg_open_price - avg_close_price) * total_close_qty * mult \
+        # P&L in contract currency (USD for ES/YM)
+        gross_pl_usd = (avg_open_price - avg_close_price) * total_close_qty * mult \
             if is_short_roll else \
             (avg_close_price - avg_open_price) * total_close_qty * mult
-        gross_pl_aud = gross_pl_orig / close_fx if close_fx else 0
+        # fx_rate_to_aud = AUD per 1 unit of contract currency → multiply to convert
+        gross_pl_aud = gross_pl_usd * close_fx if close_fx else 0
         total_commission = sum(t.total_commission or 0 for t in txns)
         net_pl_aud = gross_pl_aud - total_commission
         lots_signed = -total_close_qty if is_short_roll else total_close_qty
@@ -160,6 +162,7 @@ def roll_trades(
             "lots": lots_signed,
             "avg_close_price": round(avg_close_price, 4),
             "avg_open_price": round(avg_open_price, 4),
+            "gross_pl_usd": round(gross_pl_usd),
             "gross_pl_aud": round(gross_pl_aud),
             "total_commission": round(total_commission),
             "net_pl_aud": round(net_pl_aud),

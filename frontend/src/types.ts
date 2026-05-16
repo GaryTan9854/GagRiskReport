@@ -119,6 +119,7 @@ export interface RollTrade {
   lots: number
   avg_close_price: number
   avg_open_price: number
+  gross_pl_usd: number
   gross_pl_aud: number
   total_commission: number
   net_pl_aud: number
