@@ -35,7 +35,7 @@ app.include_router(positions.router,    prefix="/api")
 app.include_router(prices.router,       prefix="/api")
 app.include_router(import_.router,      prefix="/api")
 
-APP_VERSION = "1.8"
+APP_VERSION = "1.9"
 
 
 @app.get("/api/health")
@@ -49,6 +49,10 @@ if os.path.exists(STATIC_DIR):
 
     @app.get("/{full_path:path}")
     def serve_spa(full_path: str):
+        # Serve real static files (icons, manifests, etc.) before falling back to SPA
+        candidate = os.path.join(STATIC_DIR, full_path)
+        if full_path and os.path.isfile(candidate):
+            return FileResponse(candidate)
         index = os.path.join(STATIC_DIR, "index.html")
         return FileResponse(index) if os.path.exists(index) else {"error": "Frontend not built"}
 
