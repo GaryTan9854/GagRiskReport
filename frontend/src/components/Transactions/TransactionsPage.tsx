@@ -11,6 +11,8 @@ function fmt(n: number | null): string {
 }
 
 function RollTradeRow({ r }: { r: RollTrade }) {
+  const pts = r.avg_open_price - r.avg_close_price
+  const ptsStr = (pts >= 0 ? '+' : '') + pts.toFixed(3)
   return (
     <tr>
       <td className="muted">{r.date}</td>
@@ -20,6 +22,7 @@ function RollTradeRow({ r }: { r: RollTrade }) {
       <td className="muted text-right">{r.lots}</td>
       <td className="muted text-right">{r.avg_close_price.toLocaleString()}</td>
       <td className="muted text-right">{r.avg_open_price.toLocaleString()}</td>
+      <td className={`text-right font-semibold ${pts >= 0 ? 'pos' : 'neg'}`}>{ptsStr}</td>
       <td className={`text-right ${r.gross_pl_aud < 0 ? 'neg' : 'pos'}`}>{fmt(r.gross_pl_aud)}</td>
       <td className="neg text-right">{fmt(-r.total_commission)}</td>
       <td className={`text-right font-semibold ${r.net_pl_aud < 0 ? 'neg' : 'pos'}`}>{fmt(r.net_pl_aud)}</td>
@@ -120,6 +123,7 @@ export default function TransactionsPage({ view }: { view: 'all' | 'rolls' }) {
                   <th>Lots</th>
                   <th>Avg Close</th>
                   <th>Avg Open</th>
+                  <th>Pts</th>
                   <th>Gross PL (AUD)</th>
                   <th>Commission</th>
                   <th>Net PL (AUD)</th>
@@ -127,7 +131,7 @@ export default function TransactionsPage({ view }: { view: 'all' | 'rolls' }) {
               </thead>
               <tbody>
                 {rolls.length === 0 && !loading && (
-                  <tr><td colSpan={10} className="muted text-center py-6">No roll trades found</td></tr>
+                  <tr><td colSpan={11} className="muted text-center py-6">No roll trades found</td></tr>
                 )}
                 {rolls.map((r, i) => <RollTradeRow key={i} r={r} />)}
               </tbody>
