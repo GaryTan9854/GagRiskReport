@@ -19,7 +19,7 @@ export default function Navbar({ tab, onTab, onLogout }: Props) {
       <div className="max-w-[1400px] mx-auto flex items-center gap-4 px-4 py-2">
         {/* Logo */}
         <div className="flex items-center gap-2 mr-4">
-          <img src="/gag-icon.png" alt="GAG" className="w-7 h-7 object-contain" />
+          <img src="/assets/gag-icon.png" alt="GAG" className="w-7 h-7 object-contain" />
           <span className="font-bold text-white">
             <span className="text-brand-accent">GAG</span>
             <span className="text-brand-muted text-sm ml-1">Risk Report</span>

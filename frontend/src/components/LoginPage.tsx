@@ -24,7 +24,7 @@ export default function LoginPage({ onLogin }: { onLogin: (token: string) => voi
     <div className="min-h-screen flex items-center justify-center bg-brand-bg">
       <div className="bg-brand-card border border-brand-border rounded-xl p-8 w-80">
         <div className="text-center mb-6">
-          <img src="/gag-icon.png" alt="GAG" className="w-16 h-16 object-contain mx-auto" />
+          <img src="/assets/gag-icon.png" alt="GAG" className="w-16 h-16 object-contain mx-auto" />
           <h1 className="text-xl font-bold text-white mt-2">
             <span className="text-brand-accent">GAG</span> Risk Report
           </h1>
