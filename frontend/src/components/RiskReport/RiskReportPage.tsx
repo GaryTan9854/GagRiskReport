@@ -5,13 +5,19 @@ import PLSummary from './PLSummary'
 import FuturesPositions from './FuturesPositions'
 import FXPositions from './FXPositions'
 import StatementPanel from './StatementPanel'
+import DateNavBar from './DateNavBar'
 
-function todayStr() {
-  return new Date().toISOString().slice(0, 10)
+function latestTradingDay() {
+  const d = new Date()
+  // If Saturday(6) go back 1, if Sunday(0) go back 2
+  const dow = d.getDay()
+  if (dow === 6) d.setDate(d.getDate() - 1)
+  else if (dow === 0) d.setDate(d.getDate() - 2)
+  return d.toISOString().slice(0, 10)
 }
 
 export default function RiskReportPage() {
-  const [date, setDate] = useState(todayStr())
+  const [date, setDate] = useState(latestTradingDay())
   const [report, setReport] = useState<RiskReport | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -37,6 +43,11 @@ export default function RiskReportPage() {
 
   useEffect(() => { load(date) }, [date, load])
 
+  const handleDateChange = (d: string) => {
+    setDate(d)
+    setOverrides({})
+  }
+
   const handlePriceEdit = (key: string, value: number) => {
     const next = { ...overrides, [key]: value }
     setOverrides(next)
@@ -60,19 +71,18 @@ export default function RiskReportPage() {
   }
 
   const hasOverrides = Object.keys(overrides).length > 0
+  const dateLabel = new Date(date + 'T00:00:00').toLocaleDateString('en-AU', {
+    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+  })
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
+      {/* Date navigation bar */}
+      <DateNavBar selected={date} onChange={handleDateChange} />
+
       {/* Header bar */}
       <div className="flex items-center gap-3 flex-wrap">
-        <h2 className="text-white font-bold text-lg">GA Global Risk Report</h2>
-        <input
-          type="date"
-          value={date}
-          onChange={e => { setDate(e.target.value); setOverrides({}) }}
-          className="bg-brand-card border border-brand-border rounded px-2 py-1 text-white text-sm focus:outline-none focus:border-brand-accent"
-        />
-        <span className="text-brand-muted text-sm">{new Date(date + 'T00:00:00').toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+        <span className="text-white font-bold">{dateLabel}</span>
 
         <div className="flex-1" />
 
