@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from database import init_db
-from routers import auth, report, transactions, positions, prices, import_
+from routers import auth, report, transactions, positions, prices, import_, transfers
 
 init_db()
 
@@ -34,8 +34,9 @@ app.include_router(transactions.router, prefix="/api")
 app.include_router(positions.router,    prefix="/api")
 app.include_router(prices.router,       prefix="/api")
 app.include_router(import_.router,      prefix="/api")
+app.include_router(transfers.router,    prefix="/api")
 
-APP_VERSION = "2.0"
+APP_VERSION = "2.1"
 
 
 @app.get("/api/health")

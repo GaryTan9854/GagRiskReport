@@ -1,4 +1,4 @@
-type Tab = 'report' | 'transactions' | 'roll-trades' | 'import'
+type Tab = 'report' | 'transactions' | 'roll-trades' | 'transfers' | 'import'
 
 interface Props {
   tab: Tab
@@ -10,6 +10,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'report',       label: 'Daily Report' },
   { id: 'transactions', label: 'Transactions' },
   { id: 'roll-trades',  label: 'Roll Trades' },
+  { id: 'transfers',    label: 'Transfers' },
   { id: 'import',       label: 'Import PDF' },
 ]
 

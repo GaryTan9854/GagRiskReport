@@ -77,6 +77,25 @@ export const api = {
   upsertFXRate: (data: { rate_date: string; currency: string; rate: number }) =>
     request('/prices/fx', { method: 'POST', body: JSON.stringify(data) }),
 
+  // Transfers
+  getTransfers: (account?: string) =>
+    request<import('./components/Transfers/TransfersPage').Transfer[]>(
+      `/transfers${account ? `?account=${account}` : ''}`
+    ),
+
+  addTransfer: (data: {
+    transfer_date: string
+    from_account: string
+    to_account: string
+    amount: number
+    currency: string
+    fx_rate_to_aud?: number
+    notes?: string
+  }) => request('/transfers', { method: 'POST', body: JSON.stringify(data) }),
+
+  deleteTransfer: (id: number) =>
+    request<{ deleted: boolean; id: number }>(`/transfers/${id}`, { method: 'DELETE' }),
+
   // PDF Import
   importPDF: (file: File) => {
     const form = new FormData()

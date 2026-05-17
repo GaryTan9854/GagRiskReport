@@ -4,9 +4,10 @@ import LoginPage from './components/LoginPage'
 import Navbar from './components/Navbar'
 import RiskReportPage from './components/RiskReport/RiskReportPage'
 import TransactionsPage from './components/Transactions/TransactionsPage'
+import TransfersPage from './components/Transfers/TransfersPage'
 import ImportPage from './components/Import/ImportPage'
 
-type Tab = 'report' | 'transactions' | 'roll-trades' | 'import'
+type Tab = 'report' | 'transactions' | 'roll-trades' | 'transfers' | 'import'
 
 export default function App() {
   const [authed, setAuthed] = useState(false)
@@ -45,6 +46,7 @@ export default function App() {
         {tab === 'report'       && <RiskReportPage />}
         {tab === 'transactions' && <TransactionsPage view="all" />}
         {tab === 'roll-trades'  && <TransactionsPage view="rolls" />}
+        {tab === 'transfers'    && <TransfersPage />}
         {tab === 'import'       && <ImportPage />}
       </main>
     </div>
