@@ -401,7 +401,7 @@ def calc_report(db: Session, report_date: str, price_overrides: dict = None) -> 
     fx_nlv = latest_cash("fx_combined", "AUD") or (yesterday.get("nlv", {}).get("fx") if yesterday else 0)
 
     # ── VIX ───────────────────────────────────────────────────────────────────
-    vix_price = _get_price(db, report_date, "VIX", "CASH")
+    vix_price, _ = _get_price(db, report_date, "VIX", "CASH")
     vix_accum_pl = yesterday.get("vix_accum_pl") if yesterday else None
 
     result = {
