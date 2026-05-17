@@ -35,34 +35,43 @@ def _get_price(db: Session, trade_date: str, product_code: str,
     Get closing price for a contract on a date.
     Returns (price, actual_contract_month) or (None, None).
 
-    Falls back to the most recent price for any contract month of the same product
-    when the exact month has no data yet (e.g. querying 2606 on a pre-roll date
-    where only 2603 prices exist, or vice-versa after a roll).
+    Priority (to handle contract rolls correctly):
+      1. Exact date + exact contract_month  (perfect)
+      2. Exact date + any contract_month    (PDF exists for this date — use the active contract)
+      3. Most recent historical exact month (no PDF for this date, carry forward)
+      4. Most recent historical any month   (last resort)
     """
-    # ── Exact match ──────────────────────────────────────────────────────────
-    row = (
-        db.query(PriceDB)
-        .filter(
-            PriceDB.trade_date <= trade_date,
-            PriceDB.product_code == product_code,
-            PriceDB.contract_month == contract_month,
-        )
-        .order_by(PriceDB.trade_date.desc())
-        .first()
-    )
+    # 1. Perfect match
+    row = db.query(PriceDB).filter(
+        PriceDB.trade_date == trade_date,
+        PriceDB.product_code == product_code,
+        PriceDB.contract_month == contract_month,
+    ).first()
     if row:
         return row.price, row.contract_month
 
-    # ── Fallback: any contract month for this product, most recent date ──────
-    row = (
-        db.query(PriceDB)
-        .filter(
-            PriceDB.trade_date <= trade_date,
-            PriceDB.product_code == product_code,
-        )
-        .order_by(PriceDB.trade_date.desc())
-        .first()
-    )
+    # 2. Same date, any contract (PDF imported but position rolled — use current contract price)
+    row = db.query(PriceDB).filter(
+        PriceDB.trade_date == trade_date,
+        PriceDB.product_code == product_code,
+    ).order_by(PriceDB.contract_month.desc()).first()
+    if row:
+        return row.price, row.contract_month
+
+    # 3. Most recent historical exact month
+    row = db.query(PriceDB).filter(
+        PriceDB.trade_date < trade_date,
+        PriceDB.product_code == product_code,
+        PriceDB.contract_month == contract_month,
+    ).order_by(PriceDB.trade_date.desc()).first()
+    if row:
+        return row.price, row.contract_month
+
+    # 4. Most recent historical any month
+    row = db.query(PriceDB).filter(
+        PriceDB.trade_date < trade_date,
+        PriceDB.product_code == product_code,
+    ).order_by(PriceDB.trade_date.desc()).first()
     return (row.price, row.contract_month) if row else (None, None)
 
 

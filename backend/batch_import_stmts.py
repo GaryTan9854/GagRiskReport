@@ -50,6 +50,7 @@ def _upsert_price(db, date, product_code, contract_month, price, source="pdf"):
     else:
         db.add(PriceDB(trade_date=date, product_code=product_code,
                        contract_month=contract_month, price=price, source=source))
+        db.flush()  # make new row visible to subsequent queries in same session
 
 
 def _upsert_fx(db, date, currency, rate, source="pdf"):

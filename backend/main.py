@@ -35,7 +35,7 @@ app.include_router(positions.router,    prefix="/api")
 app.include_router(prices.router,       prefix="/api")
 app.include_router(import_.router,      prefix="/api")
 
-APP_VERSION = "1.17"
+APP_VERSION = "1.18"
 
 
 @app.get("/api/health")
