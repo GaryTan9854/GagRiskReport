@@ -23,7 +23,7 @@ STMT_PDF_DIR = os.getenv(
 )
 
 
-def _date_to_stmt_path(report_date: str) -> str | None:
+def _date_to_stmt_path(report_date: str):
     """
     Convert '2026-MM-DD' → '<STMT_PDF_DIR>/2026/DDMMF.pdf'
     Returns None if no matching file found.
