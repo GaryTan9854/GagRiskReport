@@ -113,5 +113,11 @@ ssh $SSH_OPTS $REMOTE_USER@$REMOTE_HOST "
   '
 "
 
+echo "🔄 [5/5] Pulling DB backup MBP → MBA…"
+rsync -az -e "ssh $SSH_OPTS" \
+  $REMOTE_USER@$REMOTE_HOST:$HOME/db/gagrisk/ \
+  "$HOME/Documents/.db-backups/gagriskreport/"
+echo "   DB synced to ~/Documents/.db-backups/gagriskreport/"
+
 echo ""
 echo "✅ Deploy complete → GagRiskReport v$NEXT_VER → https://gaglobal.visadelab.xyz"
