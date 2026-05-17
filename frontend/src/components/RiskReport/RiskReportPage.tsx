@@ -60,6 +60,12 @@ export default function RiskReportPage() {
   }
 
   const [stmtLoading, setStmtLoading] = useState(false)
+  const [stmtMsg, setStmtMsg]         = useState('')
+
+  const showMsg = (msg: string) => {
+    setStmtMsg(msg)
+    setTimeout(() => setStmtMsg(''), 3000)
+  }
 
   const openStmt = async () => {
     setStmtLoading(true)
@@ -69,12 +75,14 @@ export default function RiskReportPage() {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (!res.ok) {
-        alert(`No statement PDF for ${date}`)
+        showMsg(`本日 (${date}) 沒有 Stmt`)
         return
       }
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
       window.open(url, '_blank')
+    } catch {
+      showMsg('無法開啟 Stmt，請稍後再試')
     } finally {
       setStmtLoading(false)
     }
@@ -117,6 +125,16 @@ export default function RiskReportPage() {
           {stmtLoading ? '…' : 'Stmt'}
         </button>
       </div>
+
+      {/* No-stmt toast */}
+      {stmtMsg && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50
+                        bg-brand-card border border-brand-border text-brand-muted
+                        text-sm px-5 py-3 rounded-lg shadow-lg
+                        animate-fade-in">
+          {stmtMsg}
+        </div>
+      )}
 
       {loading && <div className="text-brand-muted py-8 text-center">Loading report…</div>}
       {error   && <div className="text-brand-red py-4">{error}</div>}
