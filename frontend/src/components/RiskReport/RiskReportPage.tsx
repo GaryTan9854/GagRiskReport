@@ -59,8 +59,25 @@ export default function RiskReportPage() {
     load(date)
   }
 
-  const openStmt = () => {
-    window.open(`/api/import/stmt/${date}`, '_blank')
+  const [stmtLoading, setStmtLoading] = useState(false)
+
+  const openStmt = async () => {
+    setStmtLoading(true)
+    try {
+      const token = sessionStorage.getItem('gag_token')
+      const res = await fetch(`/api/import/stmt/${date}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) {
+        alert(`No statement PDF for ${date}`)
+        return
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      window.open(url, '_blank')
+    } finally {
+      setStmtLoading(false)
+    }
   }
 
   const hasOverrides = Object.keys(overrides).length > 0
@@ -93,10 +110,11 @@ export default function RiskReportPage() {
 
         <button
           onClick={openStmt}
-          className="bg-brand-card border border-brand-border text-brand-muted text-sm font-semibold px-3 py-1.5 rounded hover:text-white hover:border-brand-accent/60 transition-colors"
+          disabled={stmtLoading}
+          className="bg-brand-card border border-brand-border text-brand-muted text-sm font-semibold px-3 py-1.5 rounded hover:text-white hover:border-brand-accent/60 disabled:opacity-40 transition-colors"
           title={`Open Macquarie statement for ${date}`}
         >
-          Stmt
+          {stmtLoading ? '…' : 'Stmt'}
         </button>
       </div>
 
