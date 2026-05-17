@@ -29,8 +29,17 @@ def _prev_trading_date(d: str, db: Session) -> Optional[str]:
     return row[0] if row else None
 
 
-def _get_price(db: Session, trade_date: str, product_code: str, contract_month: str) -> Optional[float]:
-    """Get closing price for a contract on a date, falling back to previous dates."""
+def _get_price(db: Session, trade_date: str, product_code: str,
+               contract_month: str) -> tuple:
+    """
+    Get closing price for a contract on a date.
+    Returns (price, actual_contract_month) or (None, None).
+
+    Falls back to the most recent price for any contract month of the same product
+    when the exact month has no data yet (e.g. querying 2606 on a pre-roll date
+    where only 2603 prices exist, or vice-versa after a roll).
+    """
+    # ── Exact match ──────────────────────────────────────────────────────────
     row = (
         db.query(PriceDB)
         .filter(
@@ -41,7 +50,20 @@ def _get_price(db: Session, trade_date: str, product_code: str, contract_month: 
         .order_by(PriceDB.trade_date.desc())
         .first()
     )
-    return row.price if row else None
+    if row:
+        return row.price, row.contract_month
+
+    # ── Fallback: any contract month for this product, most recent date ──────
+    row = (
+        db.query(PriceDB)
+        .filter(
+            PriceDB.trade_date <= trade_date,
+            PriceDB.product_code == product_code,
+        )
+        .order_by(PriceDB.trade_date.desc())
+        .first()
+    )
+    return (row.price, row.contract_month) if row else (None, None)
 
 
 def _get_fx(db: Session, rate_date: str, currency: str) -> float:
@@ -186,19 +208,24 @@ def calc_report(db: Session, report_date: str, price_overrides: dict = None) -> 
 
     for pos in futures_positions:
         key = (pos.product_code, pos.contract_month)
-        current_price = price_overrides.get(key) or _get_price(db, report_date, pos.product_code, pos.contract_month)
+        override = price_overrides.get(key)
+        if override:
+            current_price, actual_month = override, pos.contract_month
+        else:
+            current_price, actual_month = _get_price(db, report_date, pos.product_code, pos.contract_month)
         if current_price is None:
             continue
 
-        # Yesterday price for closing PL
+        # Yesterday price for closing PL — match on product + whichever month was active then
         prev_price = None
         if yesterday:
             for prev_row in yesterday.get("positions", {}).get("futures", []):
-                if prev_row["product"] == pos.product_code and prev_row["month"] == pos.contract_month:
+                if prev_row["product"] == pos.product_code:
                     prev_price = prev_row["current_price"]
                     break
 
         row = _calc_futures_position(pos, current_price, prev_price, today_audusd)
+        row["month"] = actual_month  # show the contract month actually priced
         futures_rows.append(row)
         futures_delta_aud += row["delta_aud"]
         futures_closing_pl += row["closing_pl_aud"]
@@ -224,6 +251,14 @@ def calc_report(db: Session, report_date: str, price_overrides: dict = None) -> 
         else:
             # New position opened today: MTM gain/loss since trade
             mult = t.multiplier or 50
+            key = (t.product_code, t.contract_month)
+            override = price_overrides.get(key)
+            if override:
+                current_price = override
+            else:
+                current_price, _ = _get_price(db, report_date, t.product_code, t.contract_month)
+                if current_price is None:
+                    current_price = t.entry_price
             pl_orig = (current_price - t.entry_price) * t.position * mult
             fx = t.fx_rate_to_aud or today_audusd
             futures_trade_pl += pl_orig / fx if fx else 0
