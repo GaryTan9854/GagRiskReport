@@ -23,8 +23,6 @@ export default function RiskReportPage() {
   const [report, setReport] = useState<RiskReport | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
   // Price overrides for what-if (key = "CME ES|2603" or "AUDUSD")
   const [overrides, setOverrides] = useState<Record<string, number>>({})
 
@@ -61,15 +59,8 @@ export default function RiskReportPage() {
     load(date)
   }
 
-  const saveSnapshot = async () => {
-    setSaving(true)
-    try {
-      await api.saveSnapshot(date)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
-    } finally {
-      setSaving(false)
-    }
+  const openStmt = () => {
+    window.open(`/api/import/stmt/${date}`, '_blank')
   }
 
   const hasOverrides = Object.keys(overrides).length > 0
@@ -101,11 +92,11 @@ export default function RiskReportPage() {
         )}
 
         <button
-          onClick={saveSnapshot}
-          disabled={saving || hasOverrides}
-          className="bg-brand-accent text-brand-bg text-sm font-semibold px-3 py-1.5 rounded hover:bg-sky-400 disabled:opacity-40 transition-colors"
+          onClick={openStmt}
+          className="bg-brand-card border border-brand-border text-brand-muted text-sm font-semibold px-3 py-1.5 rounded hover:text-white hover:border-brand-accent/60 transition-colors"
+          title={`Open Macquarie statement for ${date}`}
         >
-          {saved ? '✓ Saved' : saving ? 'Saving…' : 'Save Snapshot'}
+          Stmt
         </button>
       </div>
 

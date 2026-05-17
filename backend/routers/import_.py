@@ -4,7 +4,9 @@ cash balances, and statement fields in the snapshot.
 """
 
 import json
+import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from database import get_db
 from routers.auth import verify_token
@@ -13,6 +15,42 @@ from services.pdf_parser import parse_macquarie_pdf_bytes
 from services.report_engine import calc_report
 
 router = APIRouter(prefix="/import", tags=["import"])
+
+# Directory where yearly statement PDFs live (DDMMF.pdf naming convention)
+STMT_PDF_DIR = os.getenv(
+    "STMT_PDF_DIR",
+    os.path.join(os.path.expanduser("~"), "gagrisk-stmts"),
+)
+
+
+def _date_to_stmt_path(report_date: str) -> str | None:
+    """
+    Convert '2026-MM-DD' → '<STMT_PDF_DIR>/2026/DDMMF.pdf'
+    Returns None if no matching file found.
+    """
+    try:
+        year, month, day = report_date.split("-")
+    except ValueError:
+        return None
+    filename = f"{day}{month}F.pdf"
+    path = os.path.join(STMT_PDF_DIR, year, filename)
+    return path if os.path.isfile(path) else None
+
+
+@router.get("/stmt/{report_date}")
+def get_stmt_pdf(
+    report_date: str,
+    _: dict = Depends(verify_token),
+):
+    """Serve the raw Macquarie statement PDF for a given date."""
+    path = _date_to_stmt_path(report_date)
+    if not path:
+        raise HTTPException(404, f"No statement PDF found for {report_date}")
+    return FileResponse(
+        path,
+        media_type="application/pdf",
+        filename=f"GAGStmt_{report_date}.pdf",
+    )
 
 
 @router.post("/pdf")

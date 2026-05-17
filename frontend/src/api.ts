@@ -45,9 +45,6 @@ export const api = {
       body: JSON.stringify({ prices }),
     }),
 
-  saveSnapshot: (date: string) =>
-    request<{ saved: boolean }>(`/report/${date}/save`, { method: 'POST' }),
-
   listSnapshots: (limit = 30) =>
     request<{ report_date: string; nlv_aud: number }[]>(`/report/?limit=${limit}`),
 
