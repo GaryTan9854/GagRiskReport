@@ -102,11 +102,11 @@ def _parse_positions(text: str) -> list:
             current_price = float(m.group(6).replace(",", ""))
             currency = m.group(7)
 
-            # Convert month to YYMM: MAR26 → 2603
+            # Convert month to YYMM (4-digit): MAR26 → 2603
             mo_name = month_str[:3]
-            yr = month_str[3:]
+            yr = month_str[3:]   # "26"
             mo_num = month_map.get(mo_name, "00")
-            contract_month = f"20{yr}{mo_num}"
+            contract_month = f"{yr}{mo_num}"   # "2603"
 
             signed_qty = -qty if direction == "S" else qty
             positions.append({
