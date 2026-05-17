@@ -153,8 +153,6 @@ export default function RiskReportPage() {
           {report.positions.futures.length > 0 && (
             <FuturesPositions
               rows={report.positions.futures}
-              vixCash={report.vix_cash}
-              vixAccumPl={report.vix_accum_pl}
               onPriceEdit={handlePriceEdit}
             />
           )}

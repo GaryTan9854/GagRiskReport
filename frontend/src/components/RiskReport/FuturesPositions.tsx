@@ -9,8 +9,6 @@ function fmt(n: number): string {
 
 interface Props {
   rows: FuturesRow[]
-  vixCash: number | null
-  vixAccumPl: number | null
   onPriceEdit: (key: string, value: number) => void
 }
 
@@ -48,7 +46,7 @@ function EditablePrice({ value, onChange }: { value: number; onChange: (v: numbe
   )
 }
 
-export default function FuturesPositions({ rows, vixCash, vixAccumPl, onPriceEdit }: Props) {
+export default function FuturesPositions({ rows, onPriceEdit }: Props) {
   return (
     <div className="bg-brand-card border border-brand-border rounded-lg overflow-hidden">
       <div className="px-4 py-2 border-b border-brand-border">
@@ -94,15 +92,6 @@ export default function FuturesPositions({ rows, vixCash, vixAccumPl, onPriceEdi
         </tbody>
       </table>
 
-      {/* VIX info bar */}
-      {(vixCash != null || vixAccumPl != null) && (
-        <div className="flex gap-6 px-4 py-2 border-t border-brand-border text-xs text-brand-muted">
-          {vixCash != null && <span>VIX Cash : {vixCash.toFixed(2)}</span>}
-          {vixAccumPl != null && (
-            <span>VIX Accum PL : AUD <span className={vixAccumPl < 0 ? 'neg' : 'pos'}>{fmt(vixAccumPl)}</span></span>
-          )}
-        </div>
-      )}
     </div>
   )
 }
