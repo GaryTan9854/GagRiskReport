@@ -53,6 +53,20 @@ def get_stmt_pdf(
     )
 
 
+def _date_from_filename(filename: str):
+    """
+    Parse date from Macquarie filename format DDMMF.pdf → '2026-MM-DD'.
+    e.g. '1505F.pdf' → '2026-05-15'
+    Returns None if format doesn't match.
+    """
+    import re
+    m = re.match(r"^(\d{2})(\d{2})F\.pdf$", filename, re.IGNORECASE)
+    if m:
+        day, month = m.group(1), m.group(2)
+        return f"2026-{month}-{day}"
+    return None
+
+
 @router.post("/pdf")
 async def import_pdf(
     file: UploadFile = File(...),
@@ -66,6 +80,11 @@ async def import_pdf(
         raise HTTPException(400, f"PDF parse error: {e}")
 
     report_date = parsed.get("statement_date")
+    # Fallback: derive date from filename (DDMMF.pdf format)
+    if not report_date and file.filename:
+        report_date = _date_from_filename(file.filename)
+        if report_date:
+            parsed["statement_date"] = report_date
     if not report_date:
         raise HTTPException(400, "Could not determine statement date from PDF")
 

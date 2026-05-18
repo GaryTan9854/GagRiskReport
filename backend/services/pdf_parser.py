@@ -44,16 +44,32 @@ def _parse_text(text: str) -> dict:
 
 
 def _parse_date(text: str) -> Optional[str]:
-    # "31st December 2025" or "12th May 2026"
     months = {"January": "01", "February": "02", "March": "03", "April": "04",
               "May": "05", "June": "06", "July": "07", "August": "08",
               "September": "09", "October": "10", "November": "11", "December": "12"}
+
+    # "31st December 2025" or "15th May 2026"
     m = re.search(r"(\d{1,2})(?:st|nd|rd|th)\s+(\w+)\s+(\d{4})", text)
     if m:
         day, month, year = m.group(1), m.group(2), m.group(3)
         mo = months.get(month)
         if mo:
             return f"{year}-{mo}-{day.zfill(2)}"
+
+    # "15 May 2026" (no ordinal)
+    m = re.search(r"(\d{1,2})\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})", text)
+    if m:
+        day, month, year = m.group(1), m.group(2), m.group(3)
+        mo = months.get(month)
+        if mo:
+            return f"{year}-{mo}-{day.zfill(2)}"
+
+    # "15/05/2026" or "15-05-2026"
+    m = re.search(r"(\d{2})[/\-](\d{2})[/\-](20\d{2})", text)
+    if m:
+        day, month, year = m.group(1), m.group(2), m.group(3)
+        return f"{year}-{month}-{day}"
+
     return None
 
 
