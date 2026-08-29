@@ -113,13 +113,11 @@ ssh $SSH_OPTS $REMOTE_USER@$REMOTE_HOST "
   '
 "
 
-echo "🔄 [5/5] Pulling DB backup MBP → MBA…"
-LOCAL_BACKUP="$HOME/Documents/.db-backups/gagriskreport"
-mkdir -p "$LOCAL_BACKUP"
-rsync -az -e "ssh $SSH_OPTS" \
-  $REMOTE_USER@$REMOTE_HOST:/Users/gary/db/gagrisk/ \
-  "$LOCAL_BACKUP/"
-echo "   DB synced to $LOCAL_BACKUP/"
+# ── DB 備份 ────────────────────────────────────────────────────
+# 2026-08-29：拉回 MBA 這條線已停用。災難復原改由 MBP 自己每天 03:00 備份到 NAS
+# （MBP:~/bin/backup-to-nas.sh，launchd com.gary.backup-to-nas）。
+# MBP 本機已在部署前留了 5 份輪替快照（見上面的 BACKUP_DIR），回滾夠用。
+
 
 echo ""
 echo "✅ Deploy complete → GagRiskReport v$NEXT_VER → https://gaglobal.visadelab.xyz"
