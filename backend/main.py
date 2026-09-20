@@ -50,10 +50,15 @@ if os.path.exists(STATIC_DIR):
 
     @app.get("/{full_path:path}")
     def serve_spa(full_path: str):
-        # Serve real static files (icons, manifests, etc.) before falling back to SPA
-        candidate = os.path.join(STATIC_DIR, full_path)
-        if full_path and os.path.isfile(candidate):
-            return FileResponse(candidate)
+        # ★ 先送真的存在的檔案（manifest.json / icon-*.png / pwa.js / sw.js），再退回 SPA。
+        #   realpath + 前綴檢查缺一不可：少了它，`..%2f..%2f` 就能讀到 static/ 以外的
+        #   任何檔案（.env、gag_risk.db、~/.cloudflared/ 憑證、/etc/passwd 都試出來過）。
+        #   2026-09-20 與 TunaWealth／TunaTravel／TunaTCM／TunaRecipe 同一段一起補。
+        if full_path:
+            root = os.path.realpath(STATIC_DIR)
+            candidate = os.path.realpath(os.path.join(root, full_path))
+            if candidate.startswith(root + os.sep) and os.path.isfile(candidate):
+                return FileResponse(candidate)
         index = os.path.join(STATIC_DIR, "index.html")
         return FileResponse(index) if os.path.exists(index) else {"error": "Frontend not built"}
 
